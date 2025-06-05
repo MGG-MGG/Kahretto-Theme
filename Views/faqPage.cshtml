@@ -1,0 +1,252 @@
+﻿@{
+    Layout = null;
+}
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using Umbraco.Cms.Core.Models.PublishedContent
+@using Umbraco.Cms.Core
+@{
+    var faqItems = Model.Children().Where(x => x.ContentType.Alias == "faqItem");
+    var faqHeaderImage = Model.HasValue("faqHeaderImage") ? Model.Value<IPublishedContent>("faqHeaderImage") : null;
+    var faqHeaderImageUrl = faqHeaderImage != null ? faqHeaderImage.Url() : "/images/faq-header.jpg";
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title class="notranslate">Kahretto - SSS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=SoDo+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link href="/css/site.css" rel="stylesheet" />
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <span class="notranslate protect-kahretto">Kahretto</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/#bilgi1">KURUMSAL</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog#products">MENÜ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/sss">SSS</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/iletisim">İLETİŞİM</a>
+                    </li>
+                    <li class="nav-item language-switcher">
+                        <a href="javascript:void(0)" id="languageToggle" class="nav-link">
+                            <i class="fas fa-globe"></i>
+                        </a>
+                        <div id="languageMenu" class="language-menu">
+                            <a href="#" data-lang="tr">Türkçe</a>
+                            <a href="#" data-lang="en">English</a>
+                            <a href="#" data-lang="de">Deutsch</a>
+                            <a href="#" data-lang="fr">Français</a>
+                            <a href="#" data-lang="es">Español</a>
+                        </div>
+                        <div id="google_translate_element" style="display: none;"></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <script type="text/javascript">
+        let currentLang = localStorage.getItem('selectedLanguage') || 'tr';
+        document.cookie = `googtrans=/tr/${currentLang}; path=/`;
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'tr',
+                includedLanguages: 'tr,en,de,fr,es',
+                autoDisplay: false,
+                multilanguagePage: true
+            }, 'google_translate_element');
+            const protectKahretto = () => {
+                const kahrettoElements = document.querySelectorAll('.protect-kahretto');
+                kahrettoElements.forEach(element => {
+                    if (element.innerText !== 'Kahretto') {
+                        element.innerText = 'Kahretto';
+                    }
+                });
+            };
+            setTimeout(() => {
+                const translateSelect = document.querySelector('#google_translate_element select.goog-te-combo');
+                if (translateSelect) {
+                    translateSelect.value = currentLang;
+                    translateSelect.dispatchEvent(new Event('change'));
+                }
+            }, 1000);
+            document.addEventListener('DOMSubtreeModified', protectKahretto);
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            const languageToggle = document.getElementById('languageToggle');
+            const languageMenu = document.getElementById('languageMenu');
+            const languageLinks = languageMenu.querySelectorAll('a');
+            languageToggle.addEventListener('click', function (e) {
+                e.preventDefault();
+                languageMenu.style.display = languageMenu.style.display === 'block' ? 'none' : 'block';
+            });
+            languageLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const lang = this.getAttribute('data-lang');
+                    localStorage.setItem('selectedLanguage', lang);
+                    currentLang = lang;
+                    document.cookie = `googtrans=/tr/${lang}; path=/`;
+                    const translateSelect = document.querySelector('#google_translate_element select.goog-te-combo');
+                    if (translateSelect) {
+                        translateSelect.value = lang;
+                        translateSelect.dispatchEvent(new Event('change'));
+                    }
+                    languageMenu.style.display = 'none';
+                });
+            });
+            document.addEventListener('click', function (e) {
+                if (!languageToggle.contains(e.target) && !languageMenu.contains(e.target)) {
+                    languageMenu.style.display = 'none';
+                }
+            });
+
+            // "MENÜ" linki için scroll davranışı
+            const menuLink = document.querySelector('a[href="/blog#products"]');
+            if (menuLink) {
+                menuLink.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetUrl = '/blog';
+                    const targetSection = 'products';
+                    if (window.location.pathname !== targetUrl) {
+                        window.location.href = targetUrl + '#' + targetSection;
+                    } else {
+                        const targetElement = document.getElementById(targetSection);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({ behavior: 'smooth' });
+                        } else {
+                            console.error('Hedef bulunamadı: #' + targetSection);
+                        }
+                    }
+                });
+            }
+
+            // Blog yazıları için scroll davranışı (burada kullanılmasa da tutarlılık için bırakıldı)
+            document.querySelectorAll('.scroll-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        alert('Bölüm şu anda görüntülenemiyor. Lütfen sayfayı yenileyin.');
+                        console.error('Hedef bulunamadı: ' + this.getAttribute('href'));
+                    }
+                });
+            });
+        });
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <div class="hero-section" style="background-image: url('@faqHeaderImageUrl');">
+        <div class="overlay text-center">
+            <h1 class="display-4">@(Model.HasValue("faqTitle") ? Model.Value<string>("faqTitle") : "Sıkça Sorulan Sorular")</h1>
+            <p class="lead">@(Model.HasValue("faqDescription") ? Model.Value<string>("faqDescription") : "Kahretto ile kahve dünyasına dair tüm sorularınızın yanıtları burada!")</p>
+        </div>
+    </div>
+
+    <section id="faq" class="container my-5">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="accordion" id="faqAccordionLeft">
+                    @{
+                        var faqItemsList = faqItems.ToList();
+                        var halfCount = (faqItemsList.Count + 1) / 2;
+                        for (int i = 0; i < halfCount; i++)
+                        {
+                            var faq = faqItemsList[i];
+                            var question = faq.HasValue("question") ? faq.Value<string>("question") : "Soru Yok";
+                            var answer = faq.HasValue("answer") ? faq.Value<string>("answer") : "Cevap Yok";
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading-left-@i">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-left-@i" aria-expanded="@(i == 0 ? "true" : "false")" aria-controls="collapse-left-@i">
+                                        @question
+                                    </button>
+                                </h2>
+                                <div id="collapse-left-@i" class="accordion-collapse collapse @(i == 0 ? "show" : "")" aria-labelledby="heading-left-@i" data-bs-parent="#faqAccordionLeft">
+                                    <div class="accordion-body">
+                                        @answer
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="accordion" id="faqAccordionRight">
+                    @for (int i = halfCount; i < faqItemsList.Count; i++)
+                    {
+                        var faq = faqItemsList[i];
+                        var question = faq.HasValue("question") ? faq.Value<string>("question") : "Soru Yok";
+                        var answer = faq.HasValue("answer") ? faq.Value<string>("answer") : "Cevap Yok";
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading-right-@(i - halfCount)">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-right-@(i - halfCount)" aria-expanded="false" aria-controls="collapse-right-@(i - halfCount)">
+                                    @question
+                                </button>
+                            </h2>
+                            <div id="collapse-right-@(i - halfCount)" class="accordion-collapse collapse" aria-labelledby="heading-right-@(i - halfCount)" data-bs-parent="#faqAccordionRight">
+                                <div class="accordion-body">
+                                    @answer
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        @if (faqItems == null || !faqItems.Any())
+        {
+            <p class="text-center text-warning">Henüz sıkça sorulan soru eklenmemiş. Lütfen daha sonra tekrar kontrol edin!</p>
+        }
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5><span class="notranslate">Kahretto</span></h5>
+                    <p>2010’dan beri kahve tutkunlarına hizmet veriyoruz.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Hızlı Erişim</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/#bilgi1">Hakkımızda</a></li>
+                        <li><a href="/iletisim">İletişim</a></li>
+                        <li><a href="/sss">Sıkça Sorulan Sorular</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Bizi Takip Edin</h5>
+                    <p>
+                        <a href="https://www.instagram.com/kahretto" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.twitter.com/kahretto" target="_blank"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.facebook.com/kahretto" target="_blank"><i class="fab fa-facebook"></i></a>
+                    </p>
+                </div>
+            </div>
+            <p class="text-center mt-4">© 2025 <span class="notranslate">Kahretto</span>. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+</body>
+</html>
